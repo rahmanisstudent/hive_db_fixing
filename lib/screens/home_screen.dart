@@ -37,9 +37,47 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: Colors.white,
                   shadowColor: Colors.black,
                   elevation: 4,
-                  child: ListTile(
-                    title: Text(todo.title),
-                    subtitle: Text(todo.subtitle),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              todo.title,
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            Text(
+                              todo.subtitle,
+                              style: TextStyle(color: Colors.grey[600]),
+                            ),
+                          ],
+                        ),
+                        SizedBox(width: 180),
+                        IconButton(
+                          icon: Icon(Icons.edit, color: Colors.blue),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => AddTodoScreen(
+                                  index: index,
+                                  todo: todo,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red),
+                          onPressed: () {
+                            box.deleteAt(index);
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },
