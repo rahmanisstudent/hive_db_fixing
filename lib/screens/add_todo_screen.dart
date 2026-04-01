@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_db/models/todo.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class AddTodoScreen extends StatefulWidget {
   final int? index;
@@ -16,8 +15,6 @@ class AddTodoScreen extends StatefulWidget {
 class _AddTodoScreenState extends State<AddTodoScreen> {
   final titleController = TextEditingController();
   final subtitleController = TextEditingController();
-  final String _draftTitle = "draft_title";
-  final String _draftSubtitle = "draft_subtitle";
 
   bool get _isEditMode => widget.index != null && widget.todo != null;
 
@@ -25,32 +22,9 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
   void initState() {
     super.initState();
     if (_isEditMode) {
-      // mode edit: isi dari data todo yang ada, jangan load draft
       titleController.text = widget.todo!.title;
       subtitleController.text = widget.todo!.subtitle;
-    } else {
-      _loadDraft();
     }
-  }
-
-  Future<void> _loadDraft() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      titleController.text = prefs.getString(_draftTitle) ?? "";
-      subtitleController.text = prefs.getString(_draftSubtitle) ?? "";
-    });
-  }
-
-  Future<void> _saveDraft() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_draftTitle, titleController.text);
-    await prefs.setString(_draftSubtitle, subtitleController.text);
-  }
-
-  Future<void> _clearDraft() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_draftTitle);
-    await prefs.remove(_draftSubtitle);
   }
 
   @override
@@ -78,24 +52,20 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
           children: [
             TextField(
               controller: titleController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 labelText: 'Title',
               ),
-              onChanged: (value) {
-                if (!_isEditMode) _saveDraft();
-              },
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             TextField(
               controller: subtitleController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 labelText: 'Subtitle',
               ),
-              onChanged: (value) => _saveDraft(),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             ElevatedButton(
               onPressed: () async {
                 final box = Hive.box<Todo>('todos');
@@ -107,7 +77,6 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
                   box.putAt(widget.index!, newTodo);
                 } else {
                   box.add(newTodo);
-                  await _clearDraft();
                 }
                 if (context.mounted) Navigator.pop(context);
               },
