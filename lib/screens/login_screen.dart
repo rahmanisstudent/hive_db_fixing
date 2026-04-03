@@ -12,36 +12,37 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
-  String? _errorMessage;
 
-  static const String _validUsername = 'admin';
-  static const String _validPassword = '1234';
+  @override
+  void initState() {
+    super.initState();
+    _checkLogin();
+  }
 
-  Future<void> _login() async {
+  void _checkLogin() async {
+    final loginData = await SharedPreferences.getInstance();
+    final adaLogin = loginData.getBool('loginData') ?? false;
+    if (adaLogin && mounted) {
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => HomeScreen()));
+    }
+  }
+
+  void _login() async {
     final username = _usernameController.text.trim();
     final password = _passwordController.text.trim();
-
-    if (username.isEmpty || password.isEmpty) {
-      setState(
-          () => _errorMessage = 'Username dan password tidak boleh kosong.');
-      return;
-    }
-
-    if (username == _validUsername && password == _validPassword) {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('isLoggedIn', true);
+    if (username == 'budi123' && password == 'password123') {
+      final loginData = await SharedPreferences.getInstance();
+      await loginData.setBool('loginData', true);
       if (mounted) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const HomeScreen()),
         );
       }
-    } else {
-      setState(() => _errorMessage = 'Username atau password salah.');
     }
   }
 
-  // Selalu clear controller setiap selesai digunakan
   @override
   void dispose() {
     _usernameController.dispose();
@@ -82,12 +83,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       border: OutlineInputBorder(),
                     ),
                   ),
-                  SizedBox(height: 12),
-                  if (_errorMessage != null)
-                    Text(
-                      _errorMessage!,
-                      style: TextStyle(color: Colors.red),
-                    ),
                   SizedBox(height: 12),
                   SizedBox(
                     width: double.infinity,
